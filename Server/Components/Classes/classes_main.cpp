@@ -155,12 +155,12 @@ private:
 
 			if (!peer.isLeavingSpectatorMode())
 			{
-				PlayerState state = peer.getState();
+				/*PlayerState state = peer.getState();
 
 				if (state == PlayerState_Spawned || (state >= PlayerState_OnFoot && state < PlayerState_Wasted))
 				{
 					return false;
-				}
+				}*/
 			}
 
 			self.inClassRequest = true;
