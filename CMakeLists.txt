@@ -29,7 +29,7 @@ elseif(UNIX)
 	if(NOT APPLE)
 		set(CMAKE_CXX_STDLIB "libstdc++" CACHE STRING "The standard library to use.")
 		set(TARGET_BUILD_ARCH "x86" CACHE STRING "The architecture to build for.")
-		set(SHARED_OPENSSL TRUE CACHE BOOL "Whether to dynamically link the OpenSSL library")
+		set(SHARED_OPENSSL FALSE CACHE BOOL "Whether to dynamically link the OpenSSL library")
 		set(STATIC_STDCXX FALSE CACHE BOOL "Whether to statically link against libc++.")
 	# Apple Clang
 	else()
