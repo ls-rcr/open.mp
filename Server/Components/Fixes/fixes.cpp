@@ -738,10 +738,11 @@ public:
 		// * <see>OnPlayerRequestClass</see>
 		// * <author    href="https://github.com/Y-Less/" >Y_Less</author>
 		// *
-		auto pos = player.getPosition();
+		/*auto pos = player.getPosition();
 		player.removeDefaultObjects(1484, pos, 10.0f);
 		player.removeDefaultObjects(1485, pos, 10.0f);
-		player.removeDefaultObjects(1486, pos, 10.0f);
+		player.removeDefaultObjects(1486, pos, 10.0f);*/
+		
 		return true;
 	}
 
