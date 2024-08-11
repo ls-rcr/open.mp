@@ -53,6 +53,32 @@ enum SecondarySyncUpdateType
 	SecondarySyncUpdateType_Trailer = (1 << 2),
 };
 
+struct RemoveBuildingOperation {
+    unsigned model;
+    Vector3 pos;
+    float radius;
+
+    bool operator==(const RemoveBuildingOperation &other) const {
+        return model == other.model &&
+               pos.x == other.pos.x &&
+               pos.y == other.pos.y &&
+               pos.z == other.pos.z &&
+               radius == other.radius;
+    }
+};
+
+namespace std {
+    template <>
+    struct hash<RemoveBuildingOperation> {
+        std::size_t operator()(const RemoveBuildingOperation& op) const noexcept {
+            std::size_t h1 = std::hash<unsigned>{}(op.model);
+            std::size_t h2 = std::hash<float>{}(op.pos.x) ^ (std::hash<float>{}(op.pos.y) << 1) ^ (std::hash<float>{}(op.pos.z) << 2);
+            std::size_t h3 = std::hash<float>{}(op.radius);
+            return h1 ^ h2 ^ h3;
+        }
+    };
+}
+
 struct Player final : public IPlayer, public PoolIDProvider, public NoCopy
 {
 	PlayerPool& pool_;
@@ -113,11 +139,11 @@ struct Player final : public IPlayer, public PoolIDProvider, public NoCopy
 	PlayerSpectateData spectateData_;
 	float gravity_;
 	bool ghostMode_;
-	int defaultObjectsRemoved_;
+    robin_hood::unordered_flat_set<RemoveBuildingOperation> removedDefaultObjects_;
 	bool allowWeapons_;
 	bool allowTeleport_;
 	bool isUsingOfficialClient_;
-
+    
 	PrimarySyncUpdateType primarySyncUpdateType_;
 	int secondarySyncUpdateType_;
 
@@ -196,9 +222,9 @@ struct Player final : public IPlayer, public PoolIDProvider, public NoCopy
 		toSpawn_ = false;
 		lastGameTimeUpdate_ = TimePoint();
 		spectateData_ = { false, INVALID_PLAYER_ID, PlayerSpectateData::ESpectateType::None };
-		gravity_ = 0.0f;
-		ghostMode_ = false;
-		defaultObjectsRemoved_ = 0;
+        gravity_ = 0.0f;
+        ghostMode_ = false;
+        removedDefaultObjects_.clear();
 		primarySyncUpdateType_ = PrimarySyncUpdateType::None;
 		secondarySyncUpdateType_ = 0;
 		lastScoresAndPings_ = Time::now();
@@ -255,7 +281,7 @@ struct Player final : public IPlayer, public PoolIDProvider, public NoCopy
 		, spectateData_({ false, INVALID_PLAYER_ID, PlayerSpectateData::ESpectateType::None })
 		, gravity_(0.0f)
 		, ghostMode_(false)
-		, defaultObjectsRemoved_(0)
+        , removedDefaultObjects_()
 		, allowWeapons_(true)
 		, allowTeleport_(false)
 		, isUsingOfficialClient_(params.isUsingOfficialClient)
@@ -965,19 +991,11 @@ public:
 		return skillLevels_;
 	}
 
-	void removeDefaultObjects(unsigned model, Vector3 pos, float radius) override
-	{
-		defaultObjectsRemoved_++;
-		NetCode::RPC::RemoveBuildingForPlayer removeBuildingForPlayerRPC;
-		removeBuildingForPlayerRPC.ModelID = model;
-		removeBuildingForPlayerRPC.Position = pos;
-		removeBuildingForPlayerRPC.Radius = radius;
-		PacketHelper::send(removeBuildingForPlayerRPC, *this);
-	}
+    void removeDefaultObjects(unsigned model, Vector3 pos, float radius) override;
 
 	int getDefaultObjectsRemoved() const override
 	{
-		return defaultObjectsRemoved_;
+		return removedDefaultObjects_.size();
 	}
 
 	bool getKickStatus() const override

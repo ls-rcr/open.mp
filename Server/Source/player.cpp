@@ -361,6 +361,26 @@ void Player::streamOutForPlayer(IPlayer& other)
 	}
 }
 
+void Player::removeDefaultObjects(unsigned model, Vector3 pos, float radius)
+{
+	RemoveBuildingOperation op = { model, pos, radius };
+
+	/**
+		* SA-MP clients crash after too many RemoveBuildingForPlayer calls.
+		* This is especially problematic when reconnecting to servers with a lot of removed default objects.
+		*/
+	if (removedDefaultObjects_.insert(op).second) {
+		NetCode::RPC::RemoveBuildingForPlayer removeBuildingForPlayerRPC;
+		removeBuildingForPlayerRPC.ModelID = model;
+		removeBuildingForPlayerRPC.Position = pos;
+		removeBuildingForPlayerRPC.Radius = radius;
+		PacketHelper::send(removeBuildingForPlayerRPC, *this);
+	} else {
+		// do nothing, TODO: remove this block after testing
+		pool_.core.logLn(LogLevel::Warning, "Skipping remove call for playerName=%.*s", PRINT_VIEW(name_));
+	}
+}
+
 void Player::ban(StringView reason)
 {
 	PeerAddress::AddressString address;

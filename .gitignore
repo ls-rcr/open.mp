@@ -263,6 +263,17 @@ paket-files/
 __pycache__/
 *.pyc
 
+# Vim
+*.swp
+
+# OS X
+*.DS_Store
+
+# XCode files
+*.xcodeproj
+*.pbxproj
+*.xcsettings
+
 /server/src/Networking/Legacy/CMakeFiles/*.stamp
 *.depend
 *.stamp
