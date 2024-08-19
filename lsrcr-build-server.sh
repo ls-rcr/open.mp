@@ -22,4 +22,6 @@ sudo docker run \
     -e BUILD_SHARED=0 \
     -e BUILD_SERVER=1 \
     -e BUILD_TOOLS=0 \
+    -e OMP_BUILD_VERSION=$(git rev-list $(git rev-list --max-parents=0 HEAD) HEAD | wc -l) \
+    -e OMP_BUILD_COMMIT=$(git rev-parse HEAD) \
     open.mp/build:ubuntu-20.04
