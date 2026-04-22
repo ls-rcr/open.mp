@@ -14,11 +14,13 @@ RUN \
     useradd -m user && \
     su user -c 'pip3 install --user -v "conan==1.57.0"'
 
+COPY docker-entrypoint.sh /
+RUN sed -i 's/\r$//' /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
+
 USER user
 
 ENV CC=/usr/bin/clang-11 \
     CXX=/usr/bin/clang++-11 \
     PATH=~/.local/bin:${PATH}
 
-COPY docker-entrypoint.sh /
 CMD /docker-entrypoint.sh
