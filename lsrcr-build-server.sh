@@ -41,6 +41,11 @@ if [ ! -d "build/" ]; then
     mkdir build
 fi
 
+# Ensure the build dir is writable by the Docker container user (uid 1000)
+if [ "$PLATFORM" = "linux" ]; then
+    $SUDO chown -R 1000:1000 build
+fi
+
 # Navigate to the 'build/' directory
 cd build/
 
