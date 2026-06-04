@@ -385,7 +385,7 @@ bool Vehicle::updateFromPassengerSync(const VehiclePassengerSyncPacket& passenge
 		return false;
 	}
 	// Only do heavy processing if switching vehicle or switching between driver and passenger
-	int passengerSeats = Impl::getVehiclePassengerSeats(getModel());
+	int passengerSeats = Impl::getVehiclePassengerSeats(getModel(), pool);
 	// TODO: Deal with two players in the same seat.
 	// TODO: Detect fast switching cheats.
 	if (passengerSeats == 0xFF || passengerSync.SeatID < 1 || passengerSync.SeatID > passengerSeats)

@@ -36,7 +36,7 @@ SCRIPT_API(CreateVehicle, int(int modelid, Vector3 pos, float rotation, int colo
 
 SCRIPT_API(GetVehicleSeats, int(int modelid))
 {
-	return Impl::getVehiclePassengerSeats(modelid);
+	return Impl::getVehiclePassengerSeats(modelid, PawnManager().Get()->vehicles);
 }
 
 SCRIPT_API(DestroyVehicle, bool(IVehicle& vehicle))
@@ -336,7 +336,7 @@ SCRIPT_API(UpdateVehicleDamageStatus, bool(IVehicle& vehicle, int panels, int do
 
 SCRIPT_API(GetVehicleModelInfo, bool(int vehiclemodel, int infotype, Vector3& pos))
 {
-	return getVehicleModelInfo(vehiclemodel, VehicleModelInfoType(infotype), pos);
+	return getVehicleModelInfo(vehiclemodel, VehicleModelInfoType(infotype), pos, PawnManager().Get()->vehicles);
 }
 
 SCRIPT_API(SetVehicleVirtualWorld, bool(IVehicle& vehicle, int virtualWorld))
@@ -552,6 +552,35 @@ SCRIPT_API_FAILRET(GetVehicleLastDriver, INVALID_PLAYER_ID, int(IVehicle& vehicl
 	return vehicle.getLastDriverPoolID();
 }
 
+SCRIPT_API(RegisterCustomVehicleModel, bool(int modelid,
+	float sizeX, float sizeY, float sizeZ,
+	float frontSeatX, float frontSeatY, float frontSeatZ,
+	float rearSeatX, float rearSeatY, float rearSeatZ,
+	float petrolCapX, float petrolCapY, float petrolCapZ,
+	float frontWheelX, float frontWheelY, float frontWheelZ,
+	float rearWheelX, float rearWheelY, float rearWheelZ,
+	float midWheelX, float midWheelY, float midWheelZ,
+	float frontBumperZ, float rearBumperZ,
+	int passengerSeats))
+{
+	IVehiclesComponent* vehicles = PawnManager().Get()->vehicles;
+	if (!vehicles)
+	{
+		return false;
+	}
+	VehicleModelInfo info;
+	info.Size = { sizeX, sizeY, sizeZ };
+	info.FrontSeat = { frontSeatX, frontSeatY, frontSeatZ };
+	info.RearSeat = { rearSeatX, rearSeatY, rearSeatZ };
+	info.PetrolCap = { petrolCapX, petrolCapY, petrolCapZ };
+	info.FrontWheel = { frontWheelX, frontWheelY, frontWheelZ };
+	info.RearWheel = { rearWheelX, rearWheelY, rearWheelZ };
+	info.MidWheel = { midWheelX, midWheelY, midWheelZ };
+	info.FrontBumperZ = frontBumperZ;
+	info.RearBumperZ = rearBumperZ;
+	return vehicles->registerCustomVehicleModel(modelid, info, static_cast<uint8_t>(passengerSeats));
+}
+
 SCRIPT_API_FAILRET(GetVehicleDriver, INVALID_PLAYER_ID, int(IVehicle& vehicle))
 {
 	IPlayer* driver = vehicle.getDriver();
@@ -662,7 +691,7 @@ SCRIPT_API_FAILRET(GetVehicleOccupant, INVALID_PLAYER_ID, int(IVehicle& vehicle,
 
 SCRIPT_API(GetVehicleMaxPassengers, int(int model))
 {
-	return Impl::getVehiclePassengerSeats(model);
+	return Impl::getVehiclePassengerSeats(model, PawnManager().Get()->vehicles);
 }
 
 SCRIPT_API(CountVehicleOccupants, int(IVehicle& vehicle))
