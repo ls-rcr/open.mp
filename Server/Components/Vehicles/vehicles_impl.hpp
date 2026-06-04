@@ -25,6 +25,7 @@ private:
 	StaticArray<uint8_t, MAX_VEHICLE_MODELS> preloadModels;
 	StreamConfigHelper streamConfigHelper;
 	int* deathRespawnDelay = nullptr;
+	std::unordered_map<int, CustomVehicleModelData> customModels_;
 
 	struct PlayerEnterVehicleHandler : public SingleNetworkInEventHandler
 	{
@@ -304,6 +305,26 @@ public:
 		return eventDispatcher;
 	}
 
+	bool registerCustomVehicleModel(int modelId, const VehicleModelInfo& info, uint8_t passengerSeats) override
+	{
+		if (modelId < 20000 || modelId > 24999)
+		{
+			return false;
+		}
+		customModels_[modelId] = { info, passengerSeats };
+		return true;
+	}
+
+	const CustomVehicleModelData* getCustomVehicleModelData(int modelId) const override
+	{
+		auto it = customModels_.find(modelId);
+		if (it == customModels_.end())
+		{
+			return nullptr;
+		}
+		return &it->second;
+	}
+
 	void onPoolEntryDestroyed(IPlayer& player) override
 	{
 		PlayerVehicleData* data = queryExtension<PlayerVehicleData>(player);
@@ -456,7 +477,14 @@ public:
 
 		if (vehicle)
 		{
-			++preloadModels[data.modelID - 400];
+			if (data.modelID >= 20000)
+			{
+				//++preloadModels[data.modelID - 200];
+			}
+			else
+			{
+				++preloadModels[data.modelID - 400];
+			}
 
 			static bool delay_warn = false;
 			if (!delay_warn && data.respawnDelay == Seconds(0))
@@ -556,7 +584,10 @@ public:
 				return;
 			}
 
-			--preloadModels[veh_model - 400];
+			if (veh_model < 20000)
+			{
+				--preloadModels[veh_model - 400];
+			}
 			vehiclePtr->destream();
 			storage.release(index, false);
 		}

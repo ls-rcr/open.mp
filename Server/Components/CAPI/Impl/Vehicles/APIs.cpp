@@ -52,8 +52,8 @@ OMP_CAPI(Vehicle_GetID, int(objectPtr vehicle))
 
 OMP_CAPI(Vehicle_GetMaxPassengerSeats, int(int modelid))
 {
-	int seats = Impl::getVehiclePassengerSeats(modelid);
-	return seats;
+	IVehiclesComponent* vehicles = ComponentManager::Get()->vehicles;
+	return Impl::getVehiclePassengerSeats(modelid, vehicles);
 }
 
 OMP_CAPI(Vehicle_IsStreamedIn, bool(objectPtr vehicle, objectPtr player))
@@ -386,8 +386,9 @@ OMP_CAPI(Vehicle_UpdateDamageStatus, bool(objectPtr vehicle, int panels, int doo
 
 OMP_CAPI(Vehicle_GetModelInfo, bool(int vehiclemodel, int infotype, float* x, float* y, float* z))
 {
+	IVehiclesComponent* vehicles = ComponentManager::Get()->vehicles;
 	Vector3 pos = {};
-	Impl::getVehicleModelInfo(vehiclemodel, VehicleModelInfoType(infotype), pos);
+	Impl::getVehicleModelInfo(vehiclemodel, VehicleModelInfoType(infotype), pos, vehicles);
 	*x = pos.x;
 	*y = pos.y;
 	*z = pos.z;
@@ -779,4 +780,33 @@ OMP_CAPI(Vehicle_CountOccupants, int(objectPtr vehicle))
 	occupants += passengers.size();
 
 	return occupants;
+}
+
+OMP_CAPI(Vehicle_RegisterCustomModel, bool(int modelid,
+	float sizeX, float sizeY, float sizeZ,
+	float frontSeatX, float frontSeatY, float frontSeatZ,
+	float rearSeatX, float rearSeatY, float rearSeatZ,
+	float petrolCapX, float petrolCapY, float petrolCapZ,
+	float frontWheelX, float frontWheelY, float frontWheelZ,
+	float rearWheelX, float rearWheelY, float rearWheelZ,
+	float midWheelX, float midWheelY, float midWheelZ,
+	float frontBumperZ, float rearBumperZ,
+	int passengerSeats))
+{
+	IVehiclesComponent* vehicles = ComponentManager::Get()->vehicles;
+	if (!vehicles)
+	{
+		return false;
+	}
+	VehicleModelInfo info;
+	info.Size = { sizeX, sizeY, sizeZ };
+	info.FrontSeat = { frontSeatX, frontSeatY, frontSeatZ };
+	info.RearSeat = { rearSeatX, rearSeatY, rearSeatZ };
+	info.PetrolCap = { petrolCapX, petrolCapY, petrolCapZ };
+	info.FrontWheel = { frontWheelX, frontWheelY, frontWheelZ };
+	info.RearWheel = { rearWheelX, rearWheelY, rearWheelZ };
+	info.MidWheel = { midWheelX, midWheelY, midWheelZ };
+	info.FrontBumperZ = frontBumperZ;
+	info.RearBumperZ = rearBumperZ;
+	return vehicles->registerCustomVehicleModel(modelid, info, static_cast<uint8_t>(passengerSeats));
 }

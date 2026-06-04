@@ -24,4 +24,5 @@
 	url = https://github.com/openmultiplayer/open.mp-network
 [submodule "CAPI"]
 	path = CAPI
-	url = https://github.com/openmultiplayer/open.mp-capi
+	url = https://github.com/ls-rcr/open.mp-capi.git
+	branch = custom-sdk-changes
