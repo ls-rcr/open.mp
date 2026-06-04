@@ -18,11 +18,11 @@
 	url = https://github.com/openmultiplayer/cmake-conan.git
 [submodule "SDK"]
 	path = SDK
-	url = https://github.com/openmultiplayer/open.mp-sdk
+	url = https://github.com/ls-rcr/open.mp-sdk.git
+	branch = custom-sdk-changes
 [submodule "Shared/Network"]
 	path = Shared/Network
 	url = https://github.com/openmultiplayer/open.mp-network
 [submodule "CAPI"]
 	path = CAPI
-	url = https://github.com/ls-rcr/open.mp-capi.git
-	branch = custom-sdk-changes
+	url = https://github.com/openmultiplayer/open.mp-capi
