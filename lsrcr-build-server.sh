@@ -93,8 +93,13 @@ if [ "$TARGET" = "linux" ]; then
         "$DOCKER_IMAGE"
 
 elif [ "$TARGET" = "win32" ]; then
-    # Project requires Conan 1.x — enforce the same version CI uses
-    pip install -q "conan==1.65.0"
+    # Upstream cmake-conan requires Conan 2 — same as CI and the Linux Docker image
+    pip install -q "conan>=2"
+
+    # Git Bash exports ORIGINAL_PATH; the MSYS2 login shell Conan uses for autotools
+    # recipes (ICU) rebuilds PATH from it, dropping the MSVC paths vcvars just added
+    # ("cl: command not found" / configure error 77).
+    unset ORIGINAL_PATH
 
     cd build/
 
